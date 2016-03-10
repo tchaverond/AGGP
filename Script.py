@@ -3,7 +3,7 @@
 import random
 import copy
 import matplotlib
-import networkx as nx
+from networkx import *
 import heapq
 import collections
 
