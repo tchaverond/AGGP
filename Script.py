@@ -94,9 +94,42 @@ def eval_aspl(G) :
 # -__-__-__-__-__-__-__-__-__-__-             Genetic Algorithm              -__-__-__-__-__-__-__-__-__-__- #
 
 
+"""
+Removes a random edge
+"""
+def remove_random_edge(indiv):
+	index = random.random(0,indiv.number_of_edges())
+	indiv.remove_edge(indiv.edges[index])
+	return 0
 
+"""
+Adds an edge between to random nodes
+"""
+def add_random_edge(indiv):
+	index1 = random.random(0,indiv.number_of_nodes())
+	index2 = random.random(0,indiv.number_of_nodes())
+	indiv.add_edge(indiv.nodes[index1],indiv.nodes[index2])
+	return 0
 
-
+"""
+Mutates punctually the graph, it changes the edges of a vertcie chosen randomly
+"""
+def mutate(graph_list, prob_mutation, prob_insertion, prob_deletion):
+	for indiv in xrange(1,len(graph_list)):
+		r = random.random(0,1)
+		if r < prob_mutation :
+			index_edge = random.random(0,indiv.number_of_edges)
+			index_node = random.random(0,indiv.number_of_edges)
+			if random.random(0,1) < 0.5 :
+				indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])
+			else :
+				indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])
+			indiv.remove_edge(indiv.edges[index])
+		if random.random(0,1) < prob_insertion:
+			add_random_edge(indiv)
+		if random.random(0,1) < prob_deletion:
+			remove_random_edge(indiv)
+	return 0
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
