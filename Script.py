@@ -115,7 +115,7 @@ def add_random_edge(indiv):
 Mutates punctually the graph, it changes the edges of a vertcie chosen randomly
 """
 def mutate(graph_list, prob_mutation, prob_insertion, prob_deletion):
-	for indiv in xrange(1,len(graph_list)):
+	for indiv in xrange(0,len(graph_list)):
 		r = random.random(0,1)
 		if r < prob_mutation :
 			index_edge = random.random(0,indiv.number_of_edges)
@@ -130,6 +130,30 @@ def mutate(graph_list, prob_mutation, prob_insertion, prob_deletion):
 		if random.random(0,1) < prob_deletion:
 			remove_random_edge(indiv)
 	return 0
+
+"""
+Crossing - over
+"""
+def cross_mutate(graph_list, prob_cross_mutation):
+	for indiv in xrange(0,len(graph_list)):
+		if random.random(0,1) < prob_cross_mutation:
+			other = indiv
+			while other == indiv:
+				other = random.random(0,len(graph_list))
+			rand1 = random.random(0,indiv.number_of_edges())
+			rand2 = random.random(0,indiv.number_of_edges())
+			while rand1 == rand2:
+				rand2 = random.random(0,indiv.number_of_edges())
+			start = min(rand1,rand2)
+			end = max(rand1,rand2)
+			to_switch_indiv = indiv.edges[start:end]
+			to_switch_other = other.edges[start:end]
+			indiv.remove_edges_from(to_switch_indiv)
+			other.add_edges_from(to_switch_indiv)
+			other.remove_edges_from(to_switch_other)
+			indiv.add_edges_from(to_switch_other)
+	return 0
+
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
