@@ -45,7 +45,7 @@ def eval_degree_distrib(G) :
 	list2 = list2/sum(list2)
 
 	# Statistique du test de Smirnov
-	score = heapq.nlargest(1, ((a - b), a, b) for a, b in zip(list1, list2))
+	score = heapq.nlargest(1, (((a - b), a, b) for a, b in zip(list1, list2)))
 
 	return score
 
@@ -71,7 +71,7 @@ def eval_clustering_coef(G) :
 	list2 = list2/sum(list2)
 
 	# Statistique du test de Smirnov
-	score = heapq.nlargest(1, ((a - b), a, b) for a, b in zip(list1, list2))
+	score = heapq.nlargest(1, (((a - b), a, b) for a, b in zip(list1, list2)))
 
 	return score
 
