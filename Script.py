@@ -94,8 +94,65 @@ def eval_aspl(G) :
 # -__-__-__-__-__-__-__-__-__-__-             Genetic Algorithm              -__-__-__-__-__-__-__-__-__-__- #
 
 
+"""
+Removes a random edge
+"""
+def remove_random_edge(indiv):
+	index = random.random(0,indiv.number_of_edges())
+	indiv.remove_edge(indiv.edges[index])
+	return 0
 
+"""
+Adds an edge between to random nodes
+"""
+def add_random_edge(indiv):
+	index1 = random.random(0,indiv.number_of_nodes())
+	index2 = random.random(0,indiv.number_of_nodes())
+	indiv.add_edge(indiv.nodes[index1],indiv.nodes[index2])
+	return 0
 
+"""
+Mutates punctually the graph, it changes the edges of a vertcie chosen randomly
+"""
+def mutate(graph_list, prob_mutation, prob_insertion, prob_deletion):
+	for indiv in xrange(0,len(graph_list)):
+		r = random.random(0,1)
+		if r < prob_mutation :
+			index_edge = random.random(0,indiv.number_of_edges)
+			index_node = random.random(0,indiv.number_of_edges)
+			if random.random(0,1) < 0.5 :
+				indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])
+			else :
+				indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])
+			indiv.remove_edge(indiv.edges[index])
+		if random.random(0,1) < prob_insertion:
+			add_random_edge(indiv)
+		if random.random(0,1) < prob_deletion:
+			remove_random_edge(indiv)
+	return 0
+
+"""
+Crossing - over
+"""
+def cross_mutate(graph_list, prob_cross_mutation):
+	for indiv in xrange(0,len(graph_list)):
+		if random.random(0,1) < prob_cross_mutation:
+			other = indiv
+			while other == indiv:
+				other = random.random(0,len(graph_list))
+			rand1 = random.random(0,indiv.number_of_edges())
+			rand2 = random.random(0,indiv.number_of_edges())
+			while rand1 == rand2:
+				rand2 = random.random(0,indiv.number_of_edges())
+			start = min(rand1,rand2)
+			end = max(rand1,rand2)
+			to_switch_indiv = indiv.edges[start:end]
+			to_switch_other = other.edges[start:end]
+			indiv.remove_edges_from(to_switch_indiv)
+			other.add_edges_from(to_switch_indiv)
+			other.remove_edges_from(to_switch_other)
+			indiv.add_edges_from(to_switch_other)
+	return 0
 
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
