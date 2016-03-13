@@ -2,7 +2,7 @@
 
 import random
 import copy
-import matplotlib
+import matplotlib.pyplot as plt
 from networkx import *
 import heapq
 import collections
@@ -21,7 +21,7 @@ class Simulation:
 		# Nombre de sommets de chaque graphe
 		self.nb_nodes = 10
 		# Liste de genes (= liste des graphes)
-		self.genome = [self._generate_graphs(self.nb_graphs, self.nb_nodes) for i in xrange(self.nb_graphs)]
+		self.genome = [self._generate_graph(self.nb_nodes) for i in xrange(self.nb_graphs)]
 		# Liste des ponderations des scores
 		self.score_weights = [1, 1, 1]
 		# Probas pour chaque type de mutation
@@ -39,11 +39,10 @@ class Simulation:
 
 	# -__-__-__-__-__-__-__-__-__-__-           Initilization Methods            -__-__-__-__-__-__-__-__-__-__- #
 	"""
-	/!\ Not implemented yet !
-	Create N random graphs with M nodes
+	Create a random graph with N nodes
 	"""
-	def _generate_graphs(self, N, M):
-		return nx.Graph()
+	def _generate_graph(self, N):
+		return cycle_graph(N)
 
 
 	# -__-__-__-__-__-__-__-__-__-__-               Score Methods                -__-__-__-__-__-__-__-__-__-__- #
@@ -144,7 +143,7 @@ class Simulation:
 		return 0
 
 	"""
-	Mutates punctually the graph, it changes the edges of a vertcie chosen randomly
+	Mutates punctually the graph, it changes the edges of a vertice chosen randomly
 	"""
 	def mutate(self, graph_list):
 		for indiv in xrange(0,len(graph_list)):
@@ -187,13 +186,22 @@ class Simulation:
 		return 0
 
 
+
+# -__-__-__-__-__-__-__-__-__-__-           Visualization Methods            -__-__-__-__-__-__-__-__-__-__- #
+	"""
+	Draw the n-th graph of the genome
+	"""
+	def draw_graph(self, n):
+		draw(self.genome[n])
+		plt.show()
+
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 
 
 S = Simulation()
-print S.genome
+S.draw_graph(0)
 print "Hello world !"
 
 
