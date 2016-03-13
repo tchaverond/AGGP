@@ -9,23 +9,41 @@ import collections
 
 
 class Simulation:
-	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
-	# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
-	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
-	# Liste de genes (= liste des graphes)
-	genome = 0
-	# Liste des ponderations des scores
-	score_weights = 0
-	# Probas pour chaque type de mutation
-	prob_cross_mutation = 0
-	prob_mutation = 0
-	prob_insertion = 0
-	prob_deletion = 0
+	"""
+	Default Simulation constructor
+	"""
+	def __init__(self):
+		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
+		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
+		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
+		# Nombre de graphes
+		self.nb_graphs = 10
+		# Nombre de sommets de chaque graphe
+		self.nb_nodes = 10
+		# Liste de genes (= liste des graphes)
+		self.genome = [self._generate_graphs(self.nb_graphs, self.nb_nodes) for i in xrange(self.nb_graphs)]
+		# Liste des ponderations des scores
+		self.score_weights = [1, 1, 1]
+		# Probas pour chaque type de mutation
+		self.prob_cross_mutation = 0.5
+		self.prob_mutation = 0.5
+		self.prob_insertion = 0.5
+		self.prob_deletion = 0.5
+		# Coefficient de calcul de la fécondité
+		self.coef_fertility = 1
 
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-                  Methods                   -__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 
+
+	# -__-__-__-__-__-__-__-__-__-__-           Initilization Methods            -__-__-__-__-__-__-__-__-__-__- #
+	"""
+	/!\ Not implemented yet !
+	Create N random graphs with M nodes
+	"""
+	def _generate_graphs(self, N, M):
+		return nx.Graph()
 
 
 	# -__-__-__-__-__-__-__-__-__-__-               Score Methods                -__-__-__-__-__-__-__-__-__-__- #
@@ -175,6 +193,7 @@ class Simulation:
 
 
 S = Simulation()
+print S.genome
 print "Hello world !"
 
 
