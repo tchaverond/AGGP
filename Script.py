@@ -72,8 +72,9 @@ class Simulation:
 
 		all_degrees = degree_centrality(G).values()
 
-		# Fonction de répartition (en s’assurant que les éléments sont dans le bon ordre -> voir a posteriori)
-		list1 = collections.Counter(all_degrees).values()
+		# Fonction de répartition (en s’étant assuré que les éléments sont dans le bon ordre (OrderedDict))
+		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
+		list1 = dict1.values()
 
 		# Fonction de répartition théorique
 		list2 = []
@@ -98,8 +99,9 @@ class Simulation:
 		# Calcul coefficients clustering
 		clust_coeffs = clustering(G).values()
 
-		# Fonction de répartition (en s’assurant que les éléments sont dans le bon ordre -> voir a posteriori)
-		list1 = collections.Counter(clust_coeffs).values()
+		# Fonction de répartition (en s’étant assuré que les éléments sont dans le bon ordre (OrderedDict))
+		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
+		list1 = dict1.values()
 
 		# Fonction de répartition théorique
 		list2 = []
@@ -154,17 +156,17 @@ class Simulation:
 	"""
 	def mutate(self, graph_list):
 		for indiv in xrange(0,len(graph_list)):
-			if random.random(0,1) < self.prob_mutation :
+			if random.random() < self.prob_mutation :
 				index_edge = random.randint(0,indiv.number_of_edges)
 				index_node = random.randint(0,indiv.number_of_edges)
-				if random.random(0,1) < 0.5 :
+				if random.random() < 0.5 :
 					indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])
 				else :
 					indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])
 				indiv.remove_edge(indiv.edges[index])
-			if random.random(0,1) < self.prob_insertion:
+			if random.random() < self.prob_insertion:
 				add_random_edge(indiv)
-			if random.random(0,1) < self.prob_deletion:
+			if random.random() < self.prob_deletion:
 				remove_random_edge(indiv)
 		return 0
 
@@ -173,7 +175,7 @@ class Simulation:
 	"""
 	def cross_mutate(self, graph_list):
 		for indiv in xrange(0,len(graph_list)):
-			if random.random(0,1) < self.prob_cross_mutation:
+			if random.random() < self.prob_cross_mutation:
 				other = indiv
 				while other == indiv:
 					other = random.randint(0,len(graph_list))
