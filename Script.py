@@ -20,8 +20,6 @@ class Simulation:
 		self.nb_graphs = 10
 		# Nombre de sommets de chaque graphe
 		self.nb_nodes = 10
-		# Liste de genes (= liste des graphes)
-		self.genome = [self._generate_graph(self.nb_nodes) for i in xrange(self.nb_graphs)]
 		# Liste des ponderations des scores
 		self.score_weights = [1, 1, 1]
 		# Probas pour chaque type de mutation
@@ -31,6 +29,12 @@ class Simulation:
 		self.prob_deletion = 0.5
 		# Coefficient de calcul de la fécondité
 		self.coef_fertility = 1
+		# Facteur maximum du nombre d'aretes initiales
+		self.coef_ini_edges = 6
+		# Verification du nombre maximal d'aretes
+		self.coef_ini_edges = min( int(.5*(self.nb_nodes - 1)), self.coef_ini_edges)
+		# Liste de genes (= liste des graphes)
+		self.genome = [self._generate_graph(self.nb_nodes) for i in xrange(self.nb_graphs)]
 
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-                  Methods                   -__-__-__-__-__-__-__-__-__-__- #
@@ -42,7 +46,10 @@ class Simulation:
 	Create a random graph with N nodes
 	"""
 	def _generate_graph(self, N):
-		return cycle_graph(N)
+		graph = dense_gnm_random_graph(N, random.randint(N, N * self.coef_ini_edges), seed=None)
+		while not is_connected(graph) :
+			graph = dense_gnm_random_graph(N, N+2, seed=None)
+		return graph
 
 
 	# -__-__-__-__-__-__-__-__-__-__-               Score Methods                -__-__-__-__-__-__-__-__-__-__- #
@@ -192,7 +199,7 @@ class Simulation:
 	Draw the n-th graph of the genome
 	"""
 	def draw_graph(self, n):
-		draw(self.genome[n])
+		draw_circular(self.genome[n])
 		plt.show()
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -202,6 +209,7 @@ class Simulation:
 
 S = Simulation()
 S.draw_graph(0)
+print S.genome[0].number_of_edges()
 print "Hello world !"
 
 
