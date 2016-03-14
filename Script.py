@@ -136,7 +136,7 @@ class Simulation:
 	Removes a random edge
 	"""
 	def remove_random_edge(self, indiv):
-		index = random.random(0,indiv.number_of_edges())
+		index = random.randint(0,indiv.number_of_edges())
 		indiv.remove_edge(indiv.edges[index])
 		return 0
 
@@ -144,8 +144,8 @@ class Simulation:
 	Adds an edge between to random nodes
 	"""
 	def add_random_edge(self, indiv):
-		index1 = random.random(0,indiv.number_of_nodes())
-		index2 = random.random(0,indiv.number_of_nodes())
+		index1 = random.randint(0,indiv.number_of_nodes())
+		index2 = random.randint(0,indiv.number_of_nodes())
 		indiv.add_edge(indiv.nodes[index1],indiv.nodes[index2])
 		return 0
 
@@ -154,10 +154,9 @@ class Simulation:
 	"""
 	def mutate(self, graph_list):
 		for indiv in xrange(0,len(graph_list)):
-			r = random.random(0,1)
-			if r < self.prob_mutation :
-				index_edge = random.random(0,indiv.number_of_edges)
-				index_node = random.random(0,indiv.number_of_edges)
+			if random.random(0,1) < self.prob_mutation :
+				index_edge = random.randint(0,indiv.number_of_edges)
+				index_node = random.randint(0,indiv.number_of_edges)
 				if random.random(0,1) < 0.5 :
 					indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])
 				else :
@@ -177,11 +176,11 @@ class Simulation:
 			if random.random(0,1) < self.prob_cross_mutation:
 				other = indiv
 				while other == indiv:
-					other = random.random(0,len(graph_list))
-				rand1 = random.random(0,indiv.number_of_edges())
-				rand2 = random.random(0,indiv.number_of_edges())
+					other = random.randint(0,len(graph_list))
+				rand1 = random.randint(0,indiv.number_of_edges())
+				rand2 = random.randint(0,indiv.number_of_edges())
 				while rand1 == rand2:
-					rand2 = random.random(0,indiv.number_of_edges())
+					rand2 = random.randint(0,indiv.number_of_edges())
 				start = min(rand1,rand2)
 				end = max(rand1,rand2)
 				to_switch_indiv = indiv.edges[start:end]
