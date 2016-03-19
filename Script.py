@@ -197,7 +197,7 @@ class Simulation:
 	"""
 	Create a new generation
 	"""
-	def new_generation(sorted_graph_list, sorted_score_list, coef_fertility, probability_list):
+	def new_generation(self, sorted_graph_list, sorted_score_list, coef_fertility, probability_list):
 		new_graph_list = copy(sorted_graph_list)
 		F = list()
 		F = [exp(coef_fertility*sorted_score_list[i]) for i in range(len(sorted_graph_list))]
