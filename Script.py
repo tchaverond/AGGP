@@ -129,8 +129,11 @@ class Simulation:
 		score = abs(l_avg - log(log(N))) / log(log(N))
 		return score
 
-
-
+	"""
+	Compute score for each graph in the list 
+	"""
+	def compute_all_score(self, graph_list):
+		return [global_score(graph_list) for i in range(len(graph_list))]
 
 	# -__-__-__-__-__-__-__-__-__-__-             Genetic Algorithm              -__-__-__-__-__-__-__-__-__-__- #
 
