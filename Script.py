@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from networkx import *
 import heapq
 import collections
+from math import exp
 
 
 class Simulation:
@@ -192,8 +193,49 @@ class Simulation:
 				other.remove_edges_from(to_switch_other)
 				indiv.add_edges_from(to_switch_other)
 		return 0
+	
+	"""
+	Create a new generation
+	"""
+	def new_generation(sorted_graph_list, sorted_score_list, coef_fertility, probability_list):
+		new_graph_list = copy(sorted_graph_list)
+		F = list()
+		F = [exp(coef_fertility*sorted_score_list[i]) for i in range(len(sorted_graph_list))]
+		t = sum(F)
+		F = [F[i]/t for i in range(len(F))]
+		p = random.random()
+		p_added = 0
+		for i in range(len(new_graph_list)-1):
+			for j in range(len(F)):
+				p_added += F[j]
+				if p_added >= p:
+					new_graph_list[i] = copy(G[j])
+					p = random.random()
+					p_added = 0
+					break
+		
+		# Ponctual mutation
+		mutate(new_graph_list)
 
+		# Crossing over
+		cross_mutate(new_graph_list)
 
+		# This keep the best graph
+		new_graph_list[-1] = sorted_graph_list[0]
+
+		# Verify if graphs are connexe
+		for g in sorted_graph_list: #!! pseudocode probably wrong !!
+			while not is_connected(g):
+				p = random.random()
+				p_added = 0
+				for j in range(len(F)):
+					p_added += F[j]
+					if p_cumul >= p:
+						g = copy(G[j])
+						break
+				mutate([g])
+				cross_mutate([g])
+		return new_graph_list
 
 # -__-__-__-__-__-__-__-__-__-__-           Visualization Methods            -__-__-__-__-__-__-__-__-__-__- #
 	"""
