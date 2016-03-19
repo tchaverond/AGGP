@@ -135,6 +135,19 @@ class Simulation:
 	def compute_all_score(self, graph_list):
 		return [global_score(graph_list) for i in range(len(graph_list))]
 
+	"""
+	Sort graph in list by their score
+	"""
+	def sort_by_score(self, graph_list):
+		Tab = dict()
+		res = []
+		for i in range(len(graph_list)):
+			Tab[global_score(graph_list[i])] = graph_list[i]
+		sorted_tab_key = Tab.key().sort()
+		for i in sorted_tab_key:
+			res.append(Tab[i])
+		return res
+
 	# -__-__-__-__-__-__-__-__-__-__-             Genetic Algorithm              -__-__-__-__-__-__-__-__-__-__- #
 
 
