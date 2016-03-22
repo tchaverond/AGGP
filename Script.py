@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from networkx import *
 import heapq
 import collections
-from math import exp
+import math
 
 
 class Simulation:
@@ -61,7 +61,7 @@ class Simulation:
 	"""
 	def global_score(self, G) :
 
-		return self.score_weights[0]*eval_degree_distrib(G) + self.score_weights[1]*eval_clustering_coef(G) + self.score_weights[2]*eval_aspl(G)
+		return self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)
 
 
 
@@ -72,6 +72,7 @@ class Simulation:
 	def eval_degree_distrib(self, G) :
 
 		all_degrees = degree_centrality(G).values()
+		max_degree = int((number_of_nodes(G)-1)*max(all_degrees))
 
 		# Fonction de répartition (en s’étant assuré que les éléments sont dans le bon ordre (OrderedDict))
 		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
@@ -79,15 +80,16 @@ class Simulation:
 
 		# Fonction de répartition théorique
 		list2 = []
-		for k in xrange(1,max(all_degrees)) : 
+		for k in xrange(1,1+max_degree) : 
 			list2.append(k**(-2.25))
 
-		list2 = list2/sum(list2)
+		for i in xrange(len(list2)) :
+			list2[i] = list2[i]/sum(list2)
 
 		# Statistique du test de Smirnov
-		score = heapq.nlargest(1, (((a - b), a, b) for a, b in zip(list1, list2)))
+		score = heapq.nlargest(1, ((a - b) for a, b in zip(list1, list2)))
 
-		return score
+		return score[0]
 
 
 
@@ -99,22 +101,28 @@ class Simulation:
 
 		# Calcul coefficients clustering
 		clust_coeffs = clustering(G).values()
+		max_clust_coeff = int((number_of_nodes(G)-1)*max(clust_coeffs))
 
 		# Fonction de répartition (en s’étant assuré que les éléments sont dans le bon ordre (OrderedDict))
-		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
+		dict1 = collections.OrderedDict(sorted(collections.Counter(clust_coeffs).items()))
 		list1 = dict1.values()
 
 		# Fonction de répartition théorique
 		list2 = []
-		for k in xrange(1,max(clust_coeffs)) :
+		for k in xrange(1,1+max_clust_coeff) :
 			list2.append(float(1.0/k))
 
-		list2 = list2/sum(list2)
+		for i in xrange(len(list2)) :
+			list2[i] = list2[i]/sum(list2)
 
 		# Statistique du test de Smirnov
-		score = heapq.nlargest(1, (((a - b), a, b) for a, b in zip(list1, list2)))
-
-		return score
+		score = heapq.nlargest(1, ((a - b) for a, b in zip(list1, list2)))
+		
+		# if max_clust_coeff is equal to 0 (can happen with only a few edges), list2 is empty, and so is score
+		if score != [] :
+			return score[0]
+		else :
+			return -1
 
 
 
@@ -126,14 +134,14 @@ class Simulation:
 
 		l_avg = average_shortest_path_length(G)
 		N = number_of_nodes(G)
-		score = abs(l_avg - log(log(N))) / log(log(N))
+		score = abs(l_avg - math.log(math.log(N))) / math.log(math.log(N))
 		return score
 
 	"""
 	Compute score for each graph in the list 
 	"""
 	def compute_all_score(self, graph_list):
-		return [global_score(graph_list) for i in range(len(graph_list))]
+		return [self.global_score(graph_list[i]) for i in xrange(len(graph_list))]
 
 	"""
 	Sort graph in list by their score
@@ -141,9 +149,9 @@ class Simulation:
 	def sort_by_score(self, graph_list):
 		Tab = dict()
 		res = []
-		for i in range(len(graph_list)):
-			Tab[global_score(graph_list[i])] = graph_list[i]
-		sorted_tab_key = Tab.key().sort()
+		for i in xrange(len(graph_list)):
+			Tab[self.global_score(graph_list[i])] = graph_list[i]
+		sorted_tab_key = sorted(Tab.keys())                         # was returning 'None' with Tab.keys().sort()
 		for i in sorted_tab_key:
 			res.append(Tab[i])
 		return res
@@ -155,55 +163,57 @@ class Simulation:
 	Removes a random edge
 	"""
 	def remove_random_edge(self, indiv):
-		index = random.randint(0,indiv.number_of_edges())
-		indiv.remove_edge(indiv.edges[index])
+		index = random.randint(0,indiv.number_of_edges()-1)
+		indiv.remove_edge(indiv.edges()[index][0],indiv.edges()[index][1])
 		return 0
 
 	"""
 	Adds an edge between to random nodes
 	"""
 	def add_random_edge(self, indiv):
-		index1 = random.randint(0,indiv.number_of_nodes())
-		index2 = random.randint(0,indiv.number_of_nodes())
-		indiv.add_edge(indiv.nodes[index1],indiv.nodes[index2])
+		index1 = random.randint(0,indiv.number_of_nodes()-1)
+		index2 = random.randint(0,indiv.number_of_nodes()-1)
+		indiv.add_edge(indiv.nodes()[index1],indiv.nodes()[index2])
 		return 0
 
 	"""
 	Mutates punctually the graph, it changes the edges of a vertice chosen randomly
 	"""
 	def mutate(self, graph_list):
-		for indiv in xrange(0,len(graph_list)):
+		for indiv in graph_list :
 			if random.random() < self.prob_mutation :
-				index_edge = random.randint(0,indiv.number_of_edges)
-				index_node = random.randint(0,indiv.number_of_edges)
+				index_edge = random.randint(0,indiv.number_of_edges()-1)
+				index_node = random.randint(0,indiv.number_of_edges()-1)
 				if random.random() < 0.5 :
-					indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])
+					pass
+					#indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])    # index ???
 				else :
-					indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])
-				indiv.remove_edge(indiv.edges[index])
+					pass
+					#indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])    # index ???
+				#indiv.remove_edge(indiv.edges[index])
 			if random.random() < self.prob_insertion:
-				add_random_edge(indiv)
+				self.add_random_edge(indiv)
 			if random.random() < self.prob_deletion:
-				remove_random_edge(indiv)
+				self.remove_random_edge(indiv)
 		return 0
 
 	"""
 	Crossing - over
 	"""
 	def cross_mutate(self, graph_list):
-		for indiv in xrange(0,len(graph_list)):
+		for indiv in graph_list :
 			if random.random() < self.prob_cross_mutation:
 				other = indiv
 				while other == indiv:
-					other = random.randint(0,len(graph_list))
-				rand1 = random.randint(0,indiv.number_of_edges())
-				rand2 = random.randint(0,indiv.number_of_edges())
+					other = graph_list[random.randint(0,len(graph_list)-1)]
+				rand1 = random.randint(0,indiv.number_of_edges()-1)
+				rand2 = random.randint(0,indiv.number_of_edges()-1)
 				while rand1 == rand2:
-					rand2 = random.randint(0,indiv.number_of_edges())
+					rand2 = random.randint(0,indiv.number_of_edges()-1)
 				start = min(rand1,rand2)
 				end = max(rand1,rand2)
-				to_switch_indiv = indiv.edges[start:end]
-				to_switch_other = other.edges[start:end]
+				to_switch_indiv = indiv.edges()[start:end]
+				to_switch_other = other.edges()[start:end]
 				indiv.remove_edges_from(to_switch_indiv)
 				other.add_edges_from(to_switch_indiv)
 				other.remove_edges_from(to_switch_other)
@@ -213,28 +223,31 @@ class Simulation:
 	"""
 	Create a new generation
 	"""
-	def new_generation(self, sorted_graph_list, sorted_score_list, coef_fertility, probability_list):
-		new_graph_list = copy(sorted_graph_list)
+	def new_generation(self):
+
+		sorted_graph_list = self.sort_by_score(self.genome)
+		sorted_score_list = self.compute_all_score(self.genome)
+		new_graph_list = copy.copy(sorted_graph_list)
 		F = list()
-		F = [exp(coef_fertility*sorted_score_list[i]) for i in range(len(sorted_graph_list))]
+		F = [math.exp(self.coef_fertility*sorted_score_list[i]) for i in xrange(len(sorted_graph_list))]
 		t = sum(F)
-		F = [F[i]/t for i in range(len(F))]
+		F = [F[i]/t for i in xrange(len(F))]
 		p = random.random()
 		p_added = 0
-		for i in range(len(new_graph_list)-1):
-			for j in range(len(F)):
+		for i in xrange(len(new_graph_list)-1):
+			for j in xrange(len(F)):
 				p_added += F[j]
 				if p_added >= p:
-					new_graph_list[i] = copy(G[j])
+					new_graph_list[i] = copy.copy(self.genome[j])    # G = self.genome ?
 					p = random.random()
 					p_added = 0
 					break
 		
 		# Ponctual mutation
-		mutate(new_graph_list)
+		self.mutate(new_graph_list)
 
 		# Crossing over
-		cross_mutate(new_graph_list)
+		self.cross_mutate(new_graph_list)
 
 		# This keep the best graph
 		new_graph_list[-1] = sorted_graph_list[0]
@@ -267,6 +280,7 @@ class Simulation:
 
 
 S = Simulation()
+S.new_generation()
 S.draw_graph(0)
 print S.genome[0].number_of_edges()
 print "Hello world !"
