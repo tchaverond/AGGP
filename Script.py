@@ -20,16 +20,16 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 50
+		self.nb_graphs = 20
 		# Nombre de sommets de chaque graphe
 		self.nb_nodes = 50
 		# Liste des ponderations des scores
-		self.score_weights = [0.5, 1, 10]
+		self.score_weights = [1, 5, 0.5]
 		# Probas pour chaque type de mutation
-		self.prob_cross_mutation = 0.05
-		self.prob_mutation = 0.05
-		self.prob_insertion = 0.05
-		self.prob_deletion = 0.05
+		self.prob_cross_mutation = 0
+		self.prob_mutation = 0.5
+		self.prob_insertion = 0.5
+		self.prob_deletion = 0.5
 		# Coefficient de calcul de la fécondité
 		self.coef_fertility = 1
 		# Facteur maximum du nombre d'aretes initiales
@@ -80,16 +80,22 @@ class Simulation:
 		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
 		list1 = dict1.values()
 
+		norm = sum(list1)
+		for i in xrange(len(list1)) :
+			list1[i] = float(list1[i])/norm
+
 		# Fonction de répartition théorique
 		list2 = []
 		for k in xrange(1,1+max_degree) : 
 			list2.append(k**(-2.25))
 
+		norm = sum(list2)
 		for i in xrange(len(list2)) :
-			list2[i] = list2[i]/sum(list2)
+			list2[i] = list2[i]/norm
+
 
 		# Statistique du test de Smirnov
-		score = heapq.nlargest(1, ((a - b) for a, b in zip(list1, list2)))
+		score = heapq.nlargest(1, (abs(a - b) for a, b in zip(list1, list2)))
 
 		return score[0]
 
@@ -109,16 +115,21 @@ class Simulation:
 		dict1 = collections.OrderedDict(sorted(collections.Counter(clust_coeffs).items()))
 		list1 = dict1.values()
 
+		norm = sum(list1)
+		for i in xrange(len(list1)) :
+			list1[i] = float(list1[i])/norm
+
 		# Fonction de répartition théorique
 		list2 = []
 		for k in xrange(1,1+max_clust_coeff) :
 			list2.append(float(1.0/k))
 
+		norm = sum(list2)
 		for i in xrange(len(list2)) :
-			list2[i] = list2[i]/sum(list2)
+			list2[i] = list2[i]/norm
 
 		# Statistique du test de Smirnov
-		score = heapq.nlargest(1, ((a - b) for a, b in zip(list1, list2)))
+		score = heapq.nlargest(1, (abs(a - b) for a, b in zip(list1, list2)))
 		
 		# if max_clust_coeff is equal to 0 (can happen with only a few edges), list2 is empty, and so is score
 		if score != [] :
@@ -237,13 +248,13 @@ class Simulation:
 
 		# Compute Fecondity
 		F = [None]*len(self.genome)
-		pas_thomas = None
+		best_indiv = None
 		best_score = 0
 		for i in xrange(len(graph_list)):
 			F[i] = math.exp(self.coef_fertility*(1/score_list[i]))
 			if (best_score < (1/score_list[i]) ):
 				best_score = 1/score_list[i]
-				pas_thomas = graph_list[i]
+				best_indiv = graph_list[i]
 		t = sum(F)
 		F = [F[i]/t for i in xrange(len(F))]
 
@@ -256,7 +267,7 @@ class Simulation:
 				new_graph_list[new_graph_index] = copy.deepcopy(graph_list[i])
 				self.mutate([new_graph_list[new_graph_index]])
 				new_graph_index += 1
-		new_graph_list[new_graph_index] = copy.deepcopy(pas_thomas)
+		new_graph_list[new_graph_index] = copy.deepcopy(best_indiv)
 
 		# Crossing over
 		self.cross_mutate(new_graph_list)
@@ -312,15 +323,15 @@ S = Simulation()
 def test(S) :
 	for i in xrange(100):
 		if (i %10) == 0 :
-			print i
-			S.monitor_score()
+			print i, [g.number_of_edges() for g in S.genome]
+			#S.monitor_score()
 		S.new_generation()
-S.draw_graph(0)
-S.draw_graph(49)
+#S.draw_graph(0)
+#S.draw_graph(49)
 S.monitor_score()
 test(S)
-S.draw_graph(0)
-S.draw_graph(49)
+#S.draw_graph(0)
+#S.draw_graph(49)
 S.monitor_score()
 # profile.run("test(S)")
 
