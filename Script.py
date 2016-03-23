@@ -7,6 +7,8 @@ from networkx import *
 import heapq
 import collections
 import math
+# import profile
+import numpy as np
 
 
 class Simulation:
@@ -18,9 +20,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 100
+		self.nb_graphs = 80
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 10
+		self.nb_nodes = 80
 		# Liste des ponderations des scores
 		self.score_weights = [1, 1, 1]
 		# Probas pour chaque type de mutation
@@ -226,34 +228,38 @@ class Simulation:
 	"""
 	def new_generation(self):
 
-		
-		sorted_graph_list = self.sort_by_score(self.genome)
+		# Get current graph list and scores
+		graph_list = self.genome
+		score_list = self.compute_all_score(self.genome)
 
-		sorted_score_list = self.compute_all_score(self.genome)
-		new_graph_list = copy.deepcopy(sorted_graph_list)
-		F = list()
-		F = [math.exp(self.coef_fertility*sorted_score_list[i]) for i in xrange(len(sorted_graph_list))]
+		# Create an array that will contain the new genome
+		new_graph_list = [None]*len(self.genome)
+
+		# Compute Fecondity
+		F = [None]*len(self.genome)
+		pas_thomas = None
+		best_score = 0
+		for i in xrange(len(graph_list)):
+			F[i] = math.exp(self.coef_fertility*(1/score_list[i]))
+			if (best_score < (1/score_list[i]) ):
+				best_score = 1/score_list[i]
+				pas_thomas = graph_list[i]
 		t = sum(F)
 		F = [F[i]/t for i in xrange(len(F))]
-		p = random.random()
-		p_added = 0
-		for i in xrange(len(new_graph_list)-1):
-			for j in xrange(len(F)):
-				p_added += F[j]
-				if p_added >= p:
-					new_graph_list[i] = copy.deepcopy(self.genome[j])
-					p = random.random()
-					p_added = 0
-					break
-		
-		# Ponctual mutation
-		self.mutate(new_graph_list)
+
+		# Reproduce
+		nb_desc = np.random.multinomial(self.nb_graphs - 1, F)
+		new_graph_index = 0
+		for i in xrange(len(graph_list)):
+			for j in xrange(nb_desc[i]):
+				# new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
+				new_graph_list[new_graph_index] = copy.deepcopy(graph_list[i])
+				self.mutate([new_graph_list[new_graph_index]])
+				new_graph_index += 1
+		new_graph_list[new_graph_index] = copy.deepcopy(pas_thomas)
 
 		# Crossing over
 		self.cross_mutate(new_graph_list)
-
-		# This keep the best graph
-		new_graph_list[-1] = sorted_graph_list[0]
 
 		# Verify if graphs are connexe
 		for i in xrange(len(new_graph_list)):
@@ -274,7 +280,7 @@ class Simulation:
 	Draw the n-th graph of the genome
 	"""
 	def draw_graph(self, n):
-		draw_circular(self.genome[n])
+		draw_spring(self.genome[n])
 		plt.show()
 
 
@@ -288,13 +294,18 @@ class Simulation:
 
 
 S = Simulation()
-# for i in xrange(len(S.genome)) :
-# 	S.monitor(i)
-for i in xrange(100):
-	print i
-	S.new_generation()
-# for i in xrange(len(S.genome)) :
-# 	S.monitor(i)
+
+def test(S) :
+	for i in xrange(100):
+		if (i %10) == 0 :
+			print i
+		S.new_generation()
+S.draw_graph(0)
+S.draw_graph(79)
+test(S)
+S.draw_graph(0)
+S.draw_graph(79)
+# profile.run("test(S)")
 
 
 
