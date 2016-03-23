@@ -18,7 +18,7 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 10
+		self.nb_graphs = 5
 		# Nombre de sommets de chaque graphe
 		self.nb_nodes = 10
 		# Liste des ponderations des scores
@@ -49,7 +49,7 @@ class Simulation:
 	def _generate_graph(self, N):
 		graph = dense_gnm_random_graph(N, random.randint(N, N * self.coef_ini_edges), seed=None)
 		while not is_connected(graph) :
-			graph = dense_gnm_random_graph(N, N+2, seed=None)
+			graph = dense_gnm_random_graph(N, N * self.coef_ini_edges, seed=None)
 		return graph
 
 
@@ -272,16 +272,22 @@ class Simulation:
 		draw_circular(self.genome[n])
 		plt.show()
 
+
+	def monitor(self, n):
+		print self.genome[n].number_of_edges()
+		print is_connected(self.genome[n])
+		self.draw_graph(n)
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 
 
 S = Simulation()
+for i in xrange(len(S.genome)) :
+	S.monitor(i)
 S.new_generation()
-S.draw_graph(0)
-print S.genome[0].number_of_edges()
-print "Hello world !"
+for i in xrange(len(S.genome)) :
+	S.monitor(i)
 
 
 
