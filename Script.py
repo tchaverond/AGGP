@@ -18,16 +18,16 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 5
+		self.nb_graphs = 100
 		# Nombre de sommets de chaque graphe
 		self.nb_nodes = 10
 		# Liste des ponderations des scores
 		self.score_weights = [1, 1, 1]
 		# Probas pour chaque type de mutation
-		self.prob_cross_mutation = 0.5
-		self.prob_mutation = 0.5
-		self.prob_insertion = 0.5
-		self.prob_deletion = 0.5
+		self.prob_cross_mutation = 0.05
+		self.prob_mutation = 0.05
+		self.prob_insertion = 0.05
+		self.prob_deletion = 0.05
 		# Coefficient de calcul de la fécondité
 		self.coef_fertility = 1
 		# Facteur maximum du nombre d'aretes initiales
@@ -150,10 +150,13 @@ class Simulation:
 		Tab = dict()
 		res = []
 		for i in xrange(len(graph_list)):
-			Tab[self.global_score(graph_list[i])] = graph_list[i]
+			Tab[self.global_score(graph_list[i])] = []
+		for i in xrange(len(graph_list)):
+			Tab[self.global_score(graph_list[i])].append(graph_list[i])
 		sorted_tab_key = sorted(Tab.keys())
 		for i in sorted_tab_key:
-			res.append(Tab[i])
+			for a in Tab[i]:
+				res.append(a)
 		return res
 
 	# -__-__-__-__-__-__-__-__-__-__-             Genetic Algorithm              -__-__-__-__-__-__-__-__-__-__- #
@@ -223,9 +226,11 @@ class Simulation:
 	"""
 	def new_generation(self):
 
+		
 		sorted_graph_list = self.sort_by_score(self.genome)
+
 		sorted_score_list = self.compute_all_score(self.genome)
-		new_graph_list = copy.copy(sorted_graph_list)
+		new_graph_list = copy.deepcopy(sorted_graph_list)
 		F = list()
 		F = [math.exp(self.coef_fertility*sorted_score_list[i]) for i in xrange(len(sorted_graph_list))]
 		t = sum(F)
@@ -236,7 +241,7 @@ class Simulation:
 			for j in xrange(len(F)):
 				p_added += F[j]
 				if p_added >= p:
-					new_graph_list[i] = copy.copy(self.genome[j])
+					new_graph_list[i] = copy.deepcopy(self.genome[j])
 					p = random.random()
 					p_added = 0
 					break
@@ -258,7 +263,7 @@ class Simulation:
 				for j in xrange(len(F)):
 					p_added += F[j]
 					if p_added >= p:
-						new_graph_list[i] = copy.copy(self.genome[j])
+						new_graph_list[i] = copy.deepcopy(self.genome[j])
 						break
 				self.mutate([new_graph_list[i]])
 		self.genome = new_graph_list
@@ -283,11 +288,13 @@ class Simulation:
 
 
 S = Simulation()
-for i in xrange(len(S.genome)) :
-	S.monitor(i)
-S.new_generation()
-for i in xrange(len(S.genome)) :
-	S.monitor(i)
+# for i in xrange(len(S.genome)) :
+# 	S.monitor(i)
+for i in xrange(100):
+	print i
+	S.new_generation()
+# for i in xrange(len(S.genome)) :
+# 	S.monitor(i)
 
 
 
