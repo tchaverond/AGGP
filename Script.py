@@ -7,7 +7,7 @@ from networkx import *
 import heapq
 import collections
 import math
-# import profile
+import profile
 import numpy as np
 
 
@@ -22,11 +22,11 @@ class Simulation:
 		# Nombre de graphes
 		self.nb_graphs = 20
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 50
+		self.nb_nodes = 30
 		# Liste des ponderations des scores
-		self.score_weights = [1, 5, 0.5]
+		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
-		self.prob_cross_mutation = 0
+		self.prob_cross_mutation = 0.2
 		self.prob_mutation = 0.5
 		self.prob_insertion = 0.5
 		self.prob_deletion = 0.5
@@ -263,8 +263,11 @@ class Simulation:
 		new_graph_index = 0
 		for i in xrange(len(graph_list)):
 			for j in xrange(nb_desc[i]):
-				# new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
-				new_graph_list[new_graph_index] = copy.deepcopy(graph_list[i])
+				if j+1 == nb_desc[i] :
+					# new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
+					new_graph_list[new_graph_index] = graph_list[i]
+				else :
+					new_graph_list[new_graph_index] = copy.deepcopy(graph_list[i])
 				self.mutate([new_graph_list[new_graph_index]])
 				new_graph_index += 1
 		new_graph_list[new_graph_index] = copy.deepcopy(best_indiv)
@@ -323,7 +326,7 @@ S = Simulation()
 def test(S) :
 	for i in xrange(100):
 		if (i %10) == 0 :
-			print i, [g.number_of_edges() for g in S.genome]
+			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			#S.monitor_score()
 		S.new_generation()
 #S.draw_graph(0)
@@ -333,7 +336,7 @@ test(S)
 #S.draw_graph(0)
 #S.draw_graph(49)
 S.monitor_score()
-# profile.run("test(S)")
+#profile.run("test(S)")
 
 
 
