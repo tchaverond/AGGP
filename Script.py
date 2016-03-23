@@ -122,7 +122,7 @@ class Simulation:
 		if score != [] :
 			return score[0]
 		else :
-			return -1
+			return (self.nb_nodes + 1)
 
 
 
@@ -151,7 +151,7 @@ class Simulation:
 		res = []
 		for i in xrange(len(graph_list)):
 			Tab[self.global_score(graph_list[i])] = graph_list[i]
-		sorted_tab_key = sorted(Tab.keys())                         # was returning 'None' with Tab.keys().sort()
+		sorted_tab_key = sorted(Tab.keys())
 		for i in sorted_tab_key:
 			res.append(Tab[i])
 		return res
@@ -183,14 +183,12 @@ class Simulation:
 		for indiv in graph_list :
 			if random.random() < self.prob_mutation :
 				index_edge = random.randint(0,indiv.number_of_edges()-1)
-				index_node = random.randint(0,indiv.number_of_edges()-1)
+				index_node = random.randint(0,indiv.number_of_nodes()-1)
 				if random.random() < 0.5 :
-					pass
-					#indiv.add_edge(indiv.edges[index][1], index.nodes[index_node])    # index ???
+					indiv.add_edge(indiv.edges()[index_edge][0], indiv.nodes()[index_node])
 				else :
-					pass
-					#indiv.add_edge(index.nodes[index_node], indiv.edges[index][2])    # index ???
-				#indiv.remove_edge(indiv.edges[index])
+					indiv.add_edge(indiv.nodes()[index_node], indiv.edges()[index_edge][1])
+				indiv.remove_edge(*indiv.edges()[index_edge])
 			if random.random() < self.prob_insertion:
 				self.add_random_edge(indiv)
 			if random.random() < self.prob_deletion:
@@ -238,7 +236,7 @@ class Simulation:
 			for j in xrange(len(F)):
 				p_added += F[j]
 				if p_added >= p:
-					new_graph_list[i] = copy.copy(self.genome[j])    # G = self.genome ?
+					new_graph_list[i] = copy.copy(self.genome[j])
 					p = random.random()
 					p_added = 0
 					break
@@ -253,18 +251,18 @@ class Simulation:
 		new_graph_list[-1] = sorted_graph_list[0]
 
 		# Verify if graphs are connexe
-		for g in sorted_graph_list: #!! pseudocode probably wrong !!
-			while not is_connected(g):
+		for i in xrange(len(new_graph_list)):
+			while not is_connected(new_graph_list[i]):
 				p = random.random()
 				p_added = 0
-				for j in range(len(F)):
+				for j in xrange(len(F)):
 					p_added += F[j]
-					if p_cumul >= p:
-						g = copy(G[j])
+					if p_added >= p:
+						new_graph_list[i] = copy.copy(self.genome[j])
 						break
-				mutate([g])
-				cross_mutate([g])
-		return new_graph_list
+				self.mutate([new_graph_list[i]])
+		self.genome = new_graph_list
+		return 0
 
 # -__-__-__-__-__-__-__-__-__-__-           Visualization Methods            -__-__-__-__-__-__-__-__-__-__- #
 	"""
