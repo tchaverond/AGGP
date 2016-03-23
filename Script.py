@@ -20,11 +20,11 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 80
+		self.nb_graphs = 50
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 80
+		self.nb_nodes = 50
 		# Liste des ponderations des scores
-		self.score_weights = [1, 1, 1]
+		self.score_weights = [0.5, 1, 10]
 		# Probas pour chaque type de mutation
 		self.prob_cross_mutation = 0.05
 		self.prob_mutation = 0.05
@@ -288,6 +288,20 @@ class Simulation:
 		print self.genome[n].number_of_edges()
 		print is_connected(self.genome[n])
 		self.draw_graph(n)
+
+	def monitor_score(self) :
+		score = [[], [], []]
+		for g in self.genome:
+			score[0].append(self.score_weights[0]*self.eval_degree_distrib(g))
+			score[1].append(self.score_weights[1]*self.eval_clustering_coef(g))
+			score[2].append(self.score_weights[2]*self.eval_aspl(g))
+		print "eval_degree_distrib:"
+		print min(score[0]), max(score[0]), sum(score[0])/len(score[0])
+		print "eval_clustering_coef:"
+		print min(score[1]), max(score[1]), sum(score[1])/len(score[1])
+		print "eval_aspl:"
+		print min(score[2]), max(score[2]), sum(score[2])/len(score[2])
+
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -299,12 +313,15 @@ def test(S) :
 	for i in xrange(100):
 		if (i %10) == 0 :
 			print i
+			S.monitor_score()
 		S.new_generation()
 S.draw_graph(0)
-S.draw_graph(79)
+S.draw_graph(49)
+S.monitor_score()
 test(S)
 S.draw_graph(0)
-S.draw_graph(79)
+S.draw_graph(49)
+S.monitor_score()
 # profile.run("test(S)")
 
 
