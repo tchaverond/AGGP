@@ -20,9 +20,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 20
+		self.nb_graphs = 35
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 30
+		self.nb_nodes = 80
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -195,21 +195,23 @@ class Simulation:
 	"""
 	Mutates punctually the graph, it changes the edges of a vertice chosen randomly
 	"""
-	def mutate(self, graph_list):
-		for indiv in graph_list :
-			if random.random() < self.prob_mutation :
-				index_edge = random.randint(0,indiv.number_of_edges()-1)
-				index_node = random.randint(0,indiv.number_of_nodes()-1)
-				if random.random() < 0.5 :
-					indiv.add_edge(indiv.edges()[index_edge][0], indiv.nodes()[index_node])
-				else :
-					indiv.add_edge(indiv.nodes()[index_node], indiv.edges()[index_edge][1])
-				indiv.remove_edge(*indiv.edges()[index_edge])
-			if random.random() < self.prob_insertion:
-				self.add_random_edge(indiv)
-			if random.random() < self.prob_deletion:
-				self.remove_random_edge(indiv)
-		return 0
+	def mutate(self, graph):
+		# Point mutation
+		if random.random() < self.prob_mutation :
+			index_edge = random.randint(0,graph.number_of_edges()-1)
+			index_node = random.randint(0,graph.number_of_nodes()-1)
+			if random.random() < 0.5 :
+				graph.add_edge(graph.edges()[index_edge][0], graph.nodes()[index_node])
+			else :
+				graph.add_edge(graph.nodes()[index_node], graph.edges()[index_edge][1])
+			graph.remove_edge(*graph.edges()[index_edge])
+		# Insertion
+		if random.random() < self.prob_insertion:
+			self.add_random_edge(graph)
+		# Deletion
+		if random.random() < self.prob_deletion:
+			self.remove_random_edge(graph)
+		return graph
 
 	"""
 	Crossing - over
@@ -265,10 +267,9 @@ class Simulation:
 			for j in xrange(nb_desc[i]):
 				if j+1 == nb_desc[i] :
 					# new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
-					new_graph_list[new_graph_index] = graph_list[i]
+					new_graph_list[new_graph_index] = self.mutate(graph_list[i])
 				else :
-					new_graph_list[new_graph_index] = copy.deepcopy(graph_list[i])
-				self.mutate([new_graph_list[new_graph_index]])
+					new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
 				new_graph_index += 1
 		new_graph_list[new_graph_index] = copy.deepcopy(best_indiv)
 
@@ -283,9 +284,8 @@ class Simulation:
 				for j in xrange(len(F)):
 					p_added += F[j]
 					if p_added >= p:
-						new_graph_list[i] = copy.deepcopy(self.genome[j])
+						new_graph_list[i] = self.mutate(copy.deepcopy(self.genome[j]))
 						break
-				self.mutate([new_graph_list[i]])
 		self.genome = new_graph_list
 		return 0
 
