@@ -20,9 +20,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 35
+		self.nb_graphs = 50
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 80
+		self.nb_nodes = 50
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -222,14 +222,18 @@ class Simulation:
 				other = indiv
 				while other == indiv:
 					other = graph_list[random.randint(0,len(graph_list)-1)]
-				rand1 = random.randint(0,indiv.number_of_edges()-1)
-				rand2 = random.randint(0,indiv.number_of_edges()-1)
+				rand1 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
+				rand2 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
 				while rand1 == rand2:
 					rand2 = random.randint(0,indiv.number_of_edges()-1)
 				start = min(rand1,rand2)
 				end = max(rand1,rand2)
 				to_switch_indiv = indiv.edges()[start:end]
 				to_switch_other = other.edges()[start:end]
+				# Take out common edges
+				common = list(set(to_switch_other) ^ set(to_switch_indiv))
+				to_switch_indiv = [i for i in to_switch_indiv if i in common]
+				to_switch_other = [i for i in to_switch_other if i in common]
 				indiv.remove_edges_from(to_switch_indiv)
 				other.add_edges_from(to_switch_indiv)
 				other.remove_edges_from(to_switch_other)
@@ -266,7 +270,6 @@ class Simulation:
 		for i in xrange(len(graph_list)):
 			for j in xrange(nb_desc[i]):
 				if j+1 == nb_desc[i] :
-					# new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
 					new_graph_list[new_graph_index] = self.mutate(graph_list[i])
 				else :
 					new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
@@ -302,6 +305,13 @@ class Simulation:
 		print self.genome[n].number_of_edges()
 		print is_connected(self.genome[n])
 		self.draw_graph(n)
+
+	def monitor2(self, graph):
+		print graph.number_of_edges(), graph.number_of_nodes()
+		print is_connected(graph)
+		draw_spring(graph)
+		plt.show()
+
 
 	def monitor_score(self) :
 		score = [[], [], []]
