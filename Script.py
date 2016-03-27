@@ -20,16 +20,17 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 50
+		self.nb_graphs = 150
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 50
+		self.nb_nodes = 100
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
-		self.prob_cross_mutation = 0.2
-		self.prob_mutation = 0.5
-		self.prob_insertion = 0.5
-		self.prob_deletion = 0.5
+		self.prob_cross_mutation = 0.06
+		self.prob_mutation = 0.22
+		self.prob_insertion = 0.22
+		self.prob_deletion = 0.22
+		self.prob_swap = 0.22
 		# Coefficient de calcul de la fécondité
 		self.coef_fertility = 1
 		# Facteur maximum du nombre d'aretes initiales
@@ -196,6 +197,9 @@ class Simulation:
 	Mutates punctually the graph, it changes the edges of a vertice chosen randomly
 	"""
 	def mutate(self, graph):
+		# Swap
+		if random.random() < self.prob_swap :
+			nx.double_edge_swap(graph, nswap=1, max_tries = 20)
 		# Point mutation
 		if random.random() < self.prob_mutation :
 			index_edge = random.randint(0,graph.number_of_edges()-1)
@@ -314,17 +318,20 @@ class Simulation:
 
 
 	def monitor_score(self) :
-		score = [[], [], []]
+		score = [[], [], [], []]
 		for g in self.genome:
 			score[0].append(self.score_weights[0]*self.eval_degree_distrib(g))
 			score[1].append(self.score_weights[1]*self.eval_clustering_coef(g))
 			score[2].append(self.score_weights[2]*self.eval_aspl(g))
+			score[3].append(self.global_score(g))
 		print "eval_degree_distrib:"
 		print min(score[0]), max(score[0]), sum(score[0])/len(score[0])
 		print "eval_clustering_coef:"
 		print min(score[1]), max(score[1]), sum(score[1])/len(score[1])
 		print "eval_aspl:"
 		print min(score[2]), max(score[2]), sum(score[2])/len(score[2])
+		print "total:"
+		print min(score[3]), max(score[3]), sum(score[3])/len(score[3])
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
@@ -334,18 +341,18 @@ class Simulation:
 S = Simulation()
 
 def test(S) :
-	for i in xrange(100):
+	for i in xrange(101):
 		if (i %10) == 0 :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
-			#S.monitor_score()
+			S.monitor_score()
 		S.new_generation()
 #S.draw_graph(0)
 #S.draw_graph(49)
-S.monitor_score()
+#S.monitor_score()
 test(S)
 #S.draw_graph(0)
 #S.draw_graph(49)
-S.monitor_score()
+#S.monitor_score()
 #profile.run("test(S)")
 
 
