@@ -22,7 +22,7 @@ class Simulation:
 		# Nombre de graphes
 		self.nb_graphs = 150
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 100
+		self.nb_nodes = 5
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -199,7 +199,10 @@ class Simulation:
 	def mutate(self, graph):
 		# Swap
 		if random.random() < self.prob_swap :
-			nx.double_edge_swap(graph, nswap=1, max_tries = 20)
+			try:
+				nx.double_edge_swap(graph, nswap=1, max_tries = 20)
+			except nx.NetworkXAlgorithmError:
+				1 # Do not erase
 		# Point mutation
 		if random.random() < self.prob_mutation :
 			index_edge = random.randint(0,graph.number_of_edges()-1)
@@ -313,7 +316,7 @@ class Simulation:
 	def monitor2(self, graph):
 		print graph.number_of_edges(), graph.number_of_nodes()
 		print is_connected(graph)
-		draw_spring(graph)
+		draw_circular(graph)
 		plt.show()
 
 
@@ -332,6 +335,7 @@ class Simulation:
 		print min(score[2]), max(score[2]), sum(score[2])/len(score[2])
 		print "total:"
 		print min(score[3]), max(score[3]), sum(score[3])/len(score[3])
+		
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
@@ -346,13 +350,7 @@ def test(S) :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			S.monitor_score()
 		S.new_generation()
-#S.draw_graph(0)
-#S.draw_graph(49)
-#S.monitor_score()
 test(S)
-#S.draw_graph(0)
-#S.draw_graph(49)
-#S.monitor_score()
 #profile.run("test(S)")
 
 
