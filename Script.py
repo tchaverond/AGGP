@@ -66,7 +66,12 @@ class Simulation:
 
 		return self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)
 
+	"""
+	Computes and returns each score of the networkx object G
+	"""
+	def global_score2(self, G) :
 
+		return [self.score_weights[0], self.score_weights[1], self.score_weights[2], self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)]
 
 	"""
 	Evaluates the degree distribution of the networkx object G passed as parameter,
@@ -156,6 +161,20 @@ class Simulation:
 	"""
 	def compute_all_score(self, graph_list):
 		return [self.global_score(graph_list[i]) for i in xrange(len(graph_list))]
+
+	"""
+	Compute score and write it in file for each graph in the list 
+	"""
+	def compute_all_score_and_write(self, graph_list, filename):
+		f = open(filename, 'w')
+		temp_score_to_return = []
+		for i in xrange(len(graph_list)):
+			temp_score_list = self.global_score2(graph_list[i])
+			f.write(str(temp_score_list[0]) + "/" + str(temp_score_list[1]) + "/" + str(temp_score_list[2]) + "/" + str(temp_score_list[3]) + "\t")
+			temp_score_to_return.append(temp_score_list[3])
+		f.write("\n")
+		f.close()
+		return temp_score_to_return
 
 	"""
 	Sort graph in list by their score
@@ -254,7 +273,7 @@ class Simulation:
 
 		# Get current graph list and scores
 		graph_list = self.genome
-		score_list = self.compute_all_score(self.genome)
+		score_list = self.compute_all_score_and_write(self.genome, "scores.data")
 
 		# Create an array that will contain the new genome
 		new_graph_list = [None]*len(self.genome)
