@@ -20,9 +20,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 50
+		self.nb_graphs = 150
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 50
+		self.nb_nodes = 5
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -218,56 +218,33 @@ class Simulation:
 		# Deletion
 		if random.random() < self.prob_deletion:
 			self.remove_random_edge(graph)
-
-		if is_connected(graph) :
-			return graph
-		else :
-			print "argh"
-			return -1
+		return graph
 
 	"""
 	Crossing - over
 	"""
 	def cross_mutate(self, graph_list):
-
-		target = np.random.binomial(self.nb_graphs,self.prob_cross_mutation)
-		done = 0
-
-		while done < target :
-		#for indiv in graph_list :
-			#if random.random() < self.prob_cross_mutation:
-			index_indiv = random.randint(0,len(graph_list)-1)
-			indiv = copy.deepcopy(graph_list[index_indiv])
-			other = indiv
-			while other == indiv:
-				index_other = random.randint(0,len(graph_list)-1)
-				other = copy.deepcopy(graph_list[index_other])
-			rand1 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
-			rand2 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
-			while rand1 == rand2:
-				rand2 = random.randint(0,indiv.number_of_edges()-1)
-			start = min(rand1,rand2)
-			end = max(rand1,rand2)
-			to_switch_indiv = indiv.edges()[start:end]
-			to_switch_other = other.edges()[start:end]
-			# Take out common edges
-			common = list(set(to_switch_other) ^ set(to_switch_indiv))
-			to_switch_indiv = [i for i in to_switch_indiv if i in common]
-			to_switch_other = [i for i in to_switch_other if i in common]
-			indiv.remove_edges_from(to_switch_indiv)
-			other.add_edges_from(to_switch_indiv)
-			other.remove_edges_from(to_switch_other)
-			indiv.add_edges_from(to_switch_other)
-
-			if is_connected(indiv) and is_connected(other) :
-				done += 1
-				graph_list[index_indiv] = indiv
-				graph_list[index_other] = other
-
-			else :
-				print "Cross-mutation invalidated, not connected"
-			
-
+		for indiv in graph_list :
+			if random.random() < self.prob_cross_mutation:
+				other = indiv
+				while other == indiv:
+					other = graph_list[random.randint(0,len(graph_list)-1)]
+				rand1 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
+				rand2 = random.randint(0,min(indiv.number_of_edges(), other.number_of_edges())-1)
+				while rand1 == rand2:
+					rand2 = random.randint(0,indiv.number_of_edges()-1)
+				start = min(rand1,rand2)
+				end = max(rand1,rand2)
+				to_switch_indiv = indiv.edges()[start:end]
+				to_switch_other = other.edges()[start:end]
+				# Take out common edges
+				common = list(set(to_switch_other) ^ set(to_switch_indiv))
+				to_switch_indiv = [i for i in to_switch_indiv if i in common]
+				to_switch_other = [i for i in to_switch_other if i in common]
+				indiv.remove_edges_from(to_switch_indiv)
+				other.add_edges_from(to_switch_indiv)
+				other.remove_edges_from(to_switch_other)
+				indiv.add_edges_from(to_switch_other)
 		return 0
 	
 	"""
@@ -300,22 +277,15 @@ class Simulation:
 		for i in xrange(len(graph_list)):
 			for j in xrange(nb_desc[i]):
 				if j+1 == nb_desc[i] :
-					new_graph = -1
-					while new_graph == -1 :
-						new_graph = self.mutate(graph_list[i])
-					new_graph_list[new_graph_index] = new_graph
+					new_graph_list[new_graph_index] = self.mutate(graph_list[i])
 				else :
-					new_graph = -1
-					while new_graph == -1 :
-						new_graph = self.mutate(copy.deepcopy(graph_list[i]))
-					new_graph_list[new_graph_index] = new_graph
+					new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
 				new_graph_index += 1
 		new_graph_list[new_graph_index] = copy.deepcopy(best_indiv)
 
 		# Crossing over
 		self.cross_mutate(new_graph_list)
 
-		"""
 		# Verify if graphs are connexe
 		for i in xrange(len(new_graph_list)):
 			while not is_connected(new_graph_list[i]):
@@ -326,8 +296,6 @@ class Simulation:
 					if p_added >= p:
 						new_graph_list[i] = self.mutate(copy.deepcopy(self.genome[j]))
 						break
-		"""
-
 		self.genome = new_graph_list
 		return 0
 
@@ -367,7 +335,6 @@ class Simulation:
 		print min(score[2]), max(score[2]), sum(score[2])/len(score[2])
 		print "total:"
 		print min(score[3]), max(score[3]), sum(score[3])/len(score[3])
-		print ""
 		
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -378,15 +345,13 @@ class Simulation:
 S = Simulation()
 
 def test(S) :
-	for i in xrange(10):
-		print i
-		'''if (i %10) == 0 :
+	for i in xrange(101):
+		if (i %10) == 0 :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			S.monitor_score()
-			'''
 		S.new_generation()
-#test(S)
-profile.run("test(S)")
+test(S)
+#profile.run("test(S)")
 
 
 
