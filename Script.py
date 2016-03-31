@@ -9,6 +9,7 @@ import collections
 import math
 import profile
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Simulation:
@@ -20,9 +21,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 150
+		self.nb_graphs = 50
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 5
+		self.nb_nodes = 50
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -39,6 +40,9 @@ class Simulation:
 		self.coef_ini_edges = min( int(.5*(self.nb_nodes - 1)), self.coef_ini_edges)
 		# Liste de genes (= liste des graphes)
 		self.genome = [self._generate_graph(self.nb_nodes) for i in xrange(self.nb_graphs)]
+		self.scores_filename = "scores.data"
+		# Erase old file
+		open(self.scores_filename, "w").close()
 
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-                  Methods                   -__-__-__-__-__-__-__-__-__-__- #
@@ -71,7 +75,7 @@ class Simulation:
 	"""
 	def global_score2(self, G) :
 
-		return [self.score_weights[0], self.score_weights[1], self.score_weights[2], self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)]
+		return [self.eval_degree_distrib(G), self.eval_clustering_coef(G), self.eval_aspl(G), self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)]
 
 	"""
 	Evaluates the degree distribution of the networkx object G passed as parameter,
@@ -165,8 +169,8 @@ class Simulation:
 	"""
 	Compute score and write it in file for each graph in the list 
 	"""
-	def compute_all_score_and_write(self, graph_list, filename):
-		f = open(filename, 'w')
+	def compute_all_score_and_write(self, graph_list):
+		f = open(self.scores_filename, 'a')
 		temp_score_to_return = []
 		for i in xrange(len(graph_list)):
 			temp_score_list = self.global_score2(graph_list[i])
@@ -273,7 +277,7 @@ class Simulation:
 
 		# Get current graph list and scores
 		graph_list = self.genome
-		score_list = self.compute_all_score_and_write(self.genome, "scores.data")
+		score_list = self.compute_all_score_and_write(self.genome)
 
 		# Create an array that will contain the new genome
 		new_graph_list = [None]*len(self.genome)
@@ -354,8 +358,46 @@ class Simulation:
 		print min(score[2]), max(score[2]), sum(score[2])/len(score[2])
 		print "total:"
 		print min(score[3]), max(score[3]), sum(score[3])/len(score[3])
-		
 
+	def import_and_plot_score(self):
+		f = open(self.scores_filename, "r")
+		line = f.readline()
+		scores_1_mean = []
+		scores_1_var = []
+		scores_2_mean = []
+		scores_2_var = []
+		scores_3_mean = []
+		scores_3_var = []
+		global_score_mean = []
+		global_score_var = []
+		global_score_min = []
+		while line != "":
+			scores_list = line.split()
+			scores_1_temp = []
+			scores_2_temp = []
+			scores_3_temp = []
+			global_score_temp = []
+			for i in scores_list:
+				tmp_score = i.split("/")
+				scores_1_temp.append(float(tmp_score[0]))
+				scores_2_temp.append(float(tmp_score[1]))
+				scores_3_temp.append(float(tmp_score[2]))
+				global_score_temp.append(float(tmp_score[3]))
+			print global_score_temp
+			scores_1_mean.append(sum(scores_1_temp)/len(scores_1_temp))
+			scores_2_mean.append(sum(scores_2_temp)/len(scores_2_temp))
+			scores_3_mean.append(sum(scores_3_temp)/len(scores_3_temp))
+			global_score_mean.append(sum(global_score_temp)/len(global_score_temp))
+			global_score_min.append(min(global_score_temp))
+			line = f.readline()
+		plt.plot(scores_1_mean)
+		plt.plot(scores_2_mean)
+		plt.plot(scores_3_mean)
+		plt.plot(global_score_mean)
+		plt.plot(global_score_min)
+		plt.show()
+		f.close()
+		
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -369,6 +411,7 @@ def test(S) :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			S.monitor_score()
 		S.new_generation()
+	S.import_and_plot_score()
 test(S)
 #profile.run("test(S)")
 
