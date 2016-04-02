@@ -21,11 +21,11 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 40
+		self.nb_graphs = 60
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 30
+		self.nb_nodes = 60
 		# Liste des ponderations des scores
-		self.score_weights = [1, 3, 0.5]
+		self.score_weights = [0.5, 3, 0.5]
 		# Probas pour chaque type de mutation
 		self.prob_cross_mutation = 0.06
 		self.prob_mutation = 0.22
@@ -74,7 +74,7 @@ class Simulation:
 	"""
 	def global_score2(self, G) :
 		res = [self.eval_degree_distrib(G), self.eval_clustering_coef(G), self.eval_aspl(G)]
-		res.append(self.score_weights[0]*res[0] + self.score_weights[1]*res[1] + self.score_weights[0]*res[2])
+		res.append(self.score_weights[0]*res[0] + self.score_weights[1]*res[1] + self.score_weights[2]*res[2])
 		return res
 
 	"""
@@ -349,7 +349,8 @@ class Simulation:
 			score[0].append(self.score_weights[0]*self.eval_degree_distrib(g))
 			score[1].append(self.score_weights[1]*self.eval_clustering_coef(g))
 			score[2].append(self.score_weights[2]*self.eval_aspl(g))
-			score[3].append(self.global_score(g))
+		score[3] = [x+y+z for x,y,z in zip(score[0], score[1], score[2])]
+
 		print "eval_degree_distrib:"
 		print min(score[0]), max(score[0]), sum(score[0])/len(score[0])
 		print "eval_clustering_coef:"
@@ -392,10 +393,14 @@ class Simulation:
 		p1 = plt.plot(scores_1_mean, label = 'Mean of the score on degree distribution')
 		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient')
 		p3 = plt.plot(scores_3_mean, label = 'Mean of the score on average shortest path length')
+		plt.xlabel('Generation')
+		plt.ylabel('Score')
 		plt.legend()
 		plt.show()
 		p4 = plt.plot(global_score_mean, label = 'Mean of the weighted average of the scores')
 		p5 = plt.plot(global_score_min, label = 'Min of the weighted average of the scores')
+		plt.xlabel('Generation')
+		plt.ylabel('Score')
 		plt.legend()
 		plt.show()
 		f.close()
