@@ -43,6 +43,8 @@ class Simulation:
 		self.scores_filename = "scores.data"
 		# Erase old file
 		open(self.scores_filename, "w").close()
+		# Simulation files prefix
+		self.prefix = "sim_"
 
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-                  Methods                   -__-__-__-__-__-__-__-__-__-__- #
@@ -335,10 +337,11 @@ class Simulation:
 		print is_connected(self.genome[n])
 		self.draw_graph(n)
 
-	def monitor2(self, graph):
+	def monitor2(self, graph, output_name):
 		print "Edges : %d, nodes : %d."%(graph.number_of_edges(), graph.number_of_nodes())
 		print "Connected : %s"%is_connected(graph)
 		draw_spring(graph)
+		plt.savefig(self.prefix+"best_graph_"+output_name+".pdf", bbox_inches='tight')
 		plt.show()
 
 	def monitor_score(self) :
@@ -357,7 +360,7 @@ class Simulation:
 		print "total:"
 		print min(score[3]), max(score[3]), sum(score[3])/len(score[3])
 
-	def import_and_plot_score(self):
+	def import_and_plot_score(self, output_name):
 		f = open(self.scores_filename, "r")
 		line = f.readline()
 		scores_1_mean = []
@@ -390,24 +393,30 @@ class Simulation:
 		p1 = plt.plot(scores_1_mean, label = 'Mean of the score on degree distribution')
 		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient')
 		p3 = plt.plot(scores_3_mean, label = 'Mean of the score on average shortest path length')
-		# plt.xlabel('Generation')
-		# plt.ylabel('Score')
-		# plt.legend()
+		plt.xlabel('Generation')
+		plt.ylabel('Score')
+		plt.legend()
+		fig = plt.gcf()
+		fig.set_size_inches(18, 18)
+		plt.savefig(self.prefix+"scores_evolution_"+output_name+".pdf", bbox_inches='tight')
 		plt.show()
 		p4 = plt.plot(global_score_mean, label = 'Mean of the weighted average of the scores')
 		p5 = plt.plot(global_score_min, label = 'Min of the weighted average of the scores')
 		plt.xlabel('Generation')
 		plt.ylabel('Score')
 		plt.legend()
+		fig = plt.gcf()
+		fig.set_size_inches(18, 18)
+		plt.savefig(self.prefix+"global_score_evolution_"+output_name+".pdf", bbox_inches='tight')
 		plt.show()
 		f.close()
 		
-	def plot_best_graph(self):
+	def plot_best_graph(self, output_name):
 		# Get current graph list and scores
 		graph_list = self.genome
 		score_list = self.compute_all_score_and_write(self.genome)
 		best = [x for x,y in zip(graph_list, score_list) if y == min(score_list)]
-		self.monitor2(best[0])
+		self.monitor2(best[0], output_name)
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
@@ -417,14 +426,14 @@ class Simulation:
 S = Simulation()
 
 def test(S) :
-	S.plot_best_graph()
+	S.plot_best_graph("beginning")
 	for i in xrange(139):
 		if (i %10) == 0 :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			#S.monitor_score()
 		S.new_generation()
-	S.plot_best_graph()
-	S.import_and_plot_score()
+	S.plot_best_graph("end")
+	S.import_and_plot_score("end")
 test(S)
 #profile.run("test(S)")
 
