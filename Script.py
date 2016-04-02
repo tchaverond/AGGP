@@ -21,9 +21,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 50
+		self.nb_graphs = 40
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 50
+		self.nb_nodes = 30
 		# Liste des ponderations des scores
 		self.score_weights = [1, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -67,15 +67,15 @@ class Simulation:
 	Computes and returns the overall score of the networkx object G, using the weights associated to each component (all passed as parameters)
 	"""
 	def global_score(self, G) :
-
 		return self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)
 
 	"""
 	Computes and returns each score of the networkx object G
 	"""
 	def global_score2(self, G) :
-
-		return [self.eval_degree_distrib(G), self.eval_clustering_coef(G), self.eval_aspl(G), self.score_weights[0]*self.eval_degree_distrib(G) + self.score_weights[1]*self.eval_clustering_coef(G) + self.score_weights[2]*self.eval_aspl(G)]
+		res = [self.eval_degree_distrib(G), self.eval_clustering_coef(G), self.eval_aspl(G)]
+		res.append(self.score_weights[0]*res[0] + self.score_weights[1]*res[1] + self.score_weights[0]*res[2])
+		return res
 
 	"""
 	Evaluates the degree distribution of the networkx object G passed as parameter,
@@ -379,22 +379,24 @@ class Simulation:
 			global_score_temp = []
 			for i in scores_list:
 				tmp_score = i.split("/")
-				scores_1_temp.append(float(tmp_score[0]))
-				scores_2_temp.append(float(tmp_score[1]))
-				scores_3_temp.append(float(tmp_score[2]))
+				scores_1_temp.append(self.score_weights[0]*float(tmp_score[0]))
+				scores_2_temp.append(self.score_weights[1]*float(tmp_score[1]))
+				scores_3_temp.append(self.score_weights[2]*float(tmp_score[2]))
 				global_score_temp.append(float(tmp_score[3]))
-			print global_score_temp
 			scores_1_mean.append(sum(scores_1_temp)/len(scores_1_temp))
 			scores_2_mean.append(sum(scores_2_temp)/len(scores_2_temp))
 			scores_3_mean.append(sum(scores_3_temp)/len(scores_3_temp))
 			global_score_mean.append(sum(global_score_temp)/len(global_score_temp))
 			global_score_min.append(min(global_score_temp))
 			line = f.readline()
-		plt.plot(scores_1_mean)
-		plt.plot(scores_2_mean)
-		plt.plot(scores_3_mean)
-		plt.plot(global_score_mean)
-		plt.plot(global_score_min)
+		p1 = plt.plot(scores_1_mean, label = 'Mean of the score on degree distribution')
+		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient')
+		p3 = plt.plot(scores_3_mean, label = 'Mean of the score on average shortest path length')
+		plt.legend()
+		plt.show()
+		p4 = plt.plot(global_score_mean, label = 'Mean of the weighted average of the scores')
+		p5 = plt.plot(global_score_min, label = 'Min of the weighted average of the scores')
+		plt.legend()
 		plt.show()
 		f.close()
 		
