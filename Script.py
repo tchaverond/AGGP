@@ -21,9 +21,9 @@ class Simulation:
 		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
 		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 		# Nombre de graphes
-		self.nb_graphs = 60
+		self.nb_graphs = 45
 		# Nombre de sommets de chaque graphe
-		self.nb_nodes = 60
+		self.nb_nodes = 38
 		# Liste des ponderations des scores
 		self.score_weights = [0.5, 3, 0.5]
 		# Probas pour chaque type de mutation
@@ -330,18 +330,16 @@ class Simulation:
 		draw_spring(self.genome[n])
 		plt.show()
 
-
 	def monitor(self, n):
 		print self.genome[n].number_of_edges()
 		print is_connected(self.genome[n])
 		self.draw_graph(n)
 
 	def monitor2(self, graph):
-		print graph.number_of_edges(), graph.number_of_nodes()
-		print is_connected(graph)
-		draw_circular(graph)
+		print "Edges : %d, nodes : %d."%(graph.number_of_edges(), graph.number_of_nodes())
+		print "Connected : %s"%is_connected(graph)
+		draw_spring(graph)
 		plt.show()
-
 
 	def monitor_score(self) :
 		score = [[], [], [], []]
@@ -350,7 +348,6 @@ class Simulation:
 			score[1].append(self.score_weights[1]*self.eval_clustering_coef(g))
 			score[2].append(self.score_weights[2]*self.eval_aspl(g))
 		score[3] = [x+y+z for x,y,z in zip(score[0], score[1], score[2])]
-
 		print "eval_degree_distrib:"
 		print min(score[0]), max(score[0]), sum(score[0])/len(score[0])
 		print "eval_clustering_coef:"
@@ -393,9 +390,9 @@ class Simulation:
 		p1 = plt.plot(scores_1_mean, label = 'Mean of the score on degree distribution')
 		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient')
 		p3 = plt.plot(scores_3_mean, label = 'Mean of the score on average shortest path length')
-		plt.xlabel('Generation')
-		plt.ylabel('Score')
-		plt.legend()
+		# plt.xlabel('Generation')
+		# plt.ylabel('Score')
+		# plt.legend()
 		plt.show()
 		p4 = plt.plot(global_score_mean, label = 'Mean of the weighted average of the scores')
 		p5 = plt.plot(global_score_min, label = 'Min of the weighted average of the scores')
@@ -405,6 +402,13 @@ class Simulation:
 		plt.show()
 		f.close()
 		
+	def plot_best_graph(self):
+		# Get current graph list and scores
+		graph_list = self.genome
+		score_list = self.compute_all_score_and_write(self.genome)
+		best = [x for x,y in zip(graph_list, score_list) if y == min(score_list)]
+		self.monitor2(best[0])
+
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -413,11 +417,13 @@ class Simulation:
 S = Simulation()
 
 def test(S) :
-	for i in xrange(101):
+	S.plot_best_graph()
+	for i in xrange(139):
 		if (i %10) == 0 :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
-			S.monitor_score()
+			#S.monitor_score()
 		S.new_generation()
+	S.plot_best_graph()
 	S.import_and_plot_score()
 test(S)
 #profile.run("test(S)")
