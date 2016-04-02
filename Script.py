@@ -45,7 +45,44 @@ class Simulation:
 		open(self.scores_filename, "w").close()
 		# Simulation files prefix
 		self.prefix = "sim_"
+		# Should we plot on screen ?
+		self.windows_plot = True
 
+	"""
+	Explicit Simulation constructor
+	"""
+	def __init__(self, tab):
+		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
+		# -__-__-__-__-__-__-__-__-__-__-                 Attributes                 -__-__-__-__-__-__-__-__-__-__- #
+		# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
+		# Nombre de graphes
+		self.nb_graphs = tab[0]
+		# Nombre de sommets de chaque graphe
+		self.nb_nodes = tab[1]
+		# Liste des ponderations des scores
+		self.score_weights = [tab[2], tab[3], tab[4]]
+		# Probas pour chaque type de mutation
+		self.prob_cross_mutation = tab[5]
+		self.prob_mutation = tab[6]
+		self.prob_insertion = tab[7]
+		self.prob_deletion = tab[8]
+		self.prob_swap = tab[9]
+		# Coefficient de calcul de la fécondité
+		self.coef_fertility = tab[10]
+		# Facteur maximum du nombre d'aretes initiales
+		self.coef_ini_edges = tab[11]
+		# Verification du nombre maximal d'aretes
+		self.coef_ini_edges = min( int(.5*(self.nb_nodes - 1)), self.coef_ini_edges)
+		# Liste de genes (= liste des graphes)
+		self.genome = [self._generate_graph(self.nb_nodes) for i in xrange(self.nb_graphs)]
+		# Simulation files prefix
+		self.prefix = tab[12]
+		self.scores_filename = self.prefix+"scores.data"
+		# Erase old file
+		open(self.scores_filename, "w").close()
+		# Should we plot on screen ?
+		self.windows_plot = tab[13]
+		
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-                  Methods                   -__-__-__-__-__-__-__-__-__-__- #
 	# -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
@@ -340,9 +377,13 @@ class Simulation:
 	def monitor2(self, graph, output_name):
 		print "Edges : %d, nodes : %d."%(graph.number_of_edges(), graph.number_of_nodes())
 		print "Connected : %s"%is_connected(graph)
+		plt.figure(1)
 		draw_spring(graph)
 		plt.savefig(self.prefix+"best_graph_"+output_name+".pdf", bbox_inches='tight')
-		plt.show()
+		if (self.windows_plot):
+			plt.show()
+		else :
+			plt.clf()
 
 	def monitor_score(self) :
 		score = [[], [], [], []]
@@ -399,7 +440,10 @@ class Simulation:
 		fig = plt.gcf()
 		fig.set_size_inches(18, 18)
 		plt.savefig(self.prefix+"scores_evolution_"+output_name+".pdf", bbox_inches='tight')
-		plt.show()
+		if (self.windows_plot):
+			plt.show()
+		else :
+			plt.clf()
 		p4 = plt.plot(global_score_mean, label = 'Mean of the weighted average of the scores')
 		p5 = plt.plot(global_score_min, label = 'Min of the weighted average of the scores')
 		plt.xlabel('Generation')
@@ -408,7 +452,10 @@ class Simulation:
 		fig = plt.gcf()
 		fig.set_size_inches(18, 18)
 		plt.savefig(self.prefix+"global_score_evolution_"+output_name+".pdf", bbox_inches='tight')
-		plt.show()
+		if (self.windows_plot):
+			plt.show()
+		else :
+			plt.clf()
 		f.close()
 		
 	def plot_best_graph(self, output_name):
@@ -422,20 +469,22 @@ class Simulation:
 # -__-__-__-__-__-__-__-__-__-__-                    Main                    -__-__-__-__-__-__-__-__-__-__- #
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 
-
-S = Simulation()
-
-def test(S) :
+def run(S, n) :
 	S.plot_best_graph("beginning")
-	for i in xrange(139):
+	for i in xrange(n):
 		if (i %10) == 0 :
 			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
 			#S.monitor_score()
 		S.new_generation()
 	S.plot_best_graph("end")
 	S.import_and_plot_score("end")
-test(S)
-#profile.run("test(S)")
+
+S1 = Simulation([45, 38, 0.5, 3, 0.5, 0.06, 0.22, 0.22, 0.22, 0.22, 1, 6, "test_toto_", False])
+S2 = Simulation([50, 40, 0.5, 3, 0.5, 0.03, 0.11, 0.11, 0.11, 0.11, 1, 6, "test_tata_", False])
+
+run(S1, 139)
+run(S2, 79)
+#profile.run("run(S)")
 
 
 
