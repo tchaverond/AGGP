@@ -319,7 +319,7 @@ class Simulation:
 		score_list = self.compute_all_score_and_write(self.genome)
 
 		# Create an array that will contain the new genome
-		new_graph_list = [None]*len(self.genome)
+		new_graph_list = [None]*(len(self.genome)-1)
 
 		# Compute Fecondity
 		F = [None]*len(self.genome)
@@ -329,7 +329,8 @@ class Simulation:
 			F[i] = math.exp(self.coef_fertility*(1/score_list[i]))
 			if (best_score < (1/score_list[i]) ):
 				best_score = 1/score_list[i]
-				best_indiv = graph_list[i]
+				index_best_indiv = i
+		best_indiv = copy.deepcopy(graph_list[index_best_indiv])
 		t = sum(F)
 		F = [F[i]/t for i in xrange(len(F))]
 
@@ -343,10 +344,14 @@ class Simulation:
 				else :
 					new_graph_list[new_graph_index] = self.mutate(copy.deepcopy(graph_list[i]))
 				new_graph_index += 1
-		new_graph_list[new_graph_index] = copy.deepcopy(best_indiv)
+
 
 		# Crossing over
 		self.cross_mutate(new_graph_list)
+
+
+		# Keeping the best individual untouched
+		new_graph_list.append(best_indiv)
 
 		# Verify if graphs are connexe
 		for i in xrange(len(new_graph_list)):
@@ -480,10 +485,10 @@ def run(S, n) :
 	S.import_and_plot_score("end")
 
 S1 = Simulation([45, 38, 0.5, 3, 0.5, 0.06, 0.22, 0.22, 0.22, 0.22, 1, 6, "test_toto_", False])
-S2 = Simulation([50, 40, 0.5, 3, 0.5, 0.03, 0.11, 0.11, 0.11, 0.11, 1, 6, "test_tata_", False])
+S2 = Simulation([90, 140, 0.5, 3, 0.5, 0.05, 0.12, 0.11, 0.11, 0.12, 1, 6, "test_tata_", False])
 
 run(S1, 139)
-run(S2, 79)
+run(S2, 199)
 #profile.run("run(S)")
 
 
