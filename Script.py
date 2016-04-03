@@ -147,6 +147,43 @@ class Simulation:
 
 		return score[0]
 
+	"""
+	Evaluates the degree distribution of the networkx object G passed as parameter,
+	compares it to the power law k^-2.25 by computing the Smirnov statistic, and plot both theoretical 
+	and observed lists.
+	"""
+	def plot_degree_distrib(self, G, output_name) :
+
+		all_degrees = degree_centrality(G).values()
+		max_degree = int((number_of_nodes(G)-1)*max(all_degrees))
+
+		# Fonction de répartition (en s’étant assuré que les éléments sont dans le bon ordre (OrderedDict))
+		dict1 = collections.OrderedDict(sorted(collections.Counter(all_degrees).items()))
+		list1 = dict1.values()
+
+		norm = sum(list1)
+		for i in xrange(len(list1)) :
+			list1[i] = float(list1[i])/norm
+
+		# Fonction de répartition théorique
+		list2 = []
+		for k in xrange(1,1+max_degree) : 
+			list2.append(k**(-2.25))
+
+		norm = sum(list2)
+		for i in xrange(len(list2)) :
+			list2[i] = list2[i]/norm
+
+		plt.plot(list1, label = 'Observed cumulative distribution', color = 'blue')
+		plt.plot(list2, label = 'Theoretical cumulative distribution', color = 'green')
+		plt.xlabel('Degree')
+		plt.ylabel('Probability')
+		plt.legend()
+		fig = plt.gcf()
+		fig.set_size_inches(18, 18)
+		plt.savefig(self.prefix+"degree_distribution_"+output_name+".pdf", bbox_inches='tight')
+
+
 
 
 	"""
@@ -363,6 +400,7 @@ class Simulation:
 						new_graph_list[i] = self.mutate(copy.deepcopy(self.genome[j]))
 						break
 		self.genome = new_graph_list
+
 		return 0
 
 # -__-__-__-__-__-__-__-__-__-__-           Visualization Methods            -__-__-__-__-__-__-__-__-__-__- #
@@ -441,7 +479,7 @@ class Simulation:
 			global_score_min.append(min(global_score_temp))
 			line = f.readline()
 		p1 = plt.plot(scores_1_mean, label = 'Mean of the score on degree distribution', color = 'blue')
-		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient', color = 'green)
+		p2 = plt.plot(scores_2_mean, label = 'Mean of the score on clustering coefficient', color = 'green')
 		p3 = plt.plot(scores_3_mean, label = 'Mean of the score on average shortest path length', color = 'red')
 		plt.fill_between(range(len(scores_1_mean)), np.array(scores_1_mean)+np.array(scores_1_var), np.array(scores_1_mean)-np.array(scores_1_var), facecolor = 'blue', alpha = 0.5)
 		plt.fill_between(range(len(scores_2_mean)), np.array(scores_2_mean)+np.array(scores_2_var), np.array(scores_2_mean)-np.array(scores_2_var), facecolor = 'green', alpha = 0.5)
@@ -494,6 +532,7 @@ def run(S, n) :
 		if (i %50) == 0 : # Graphic output to vizualize "in real-time" progress of a run
 			S.plot_best_graph("gen"+str(i))
 			S.import_and_plot_score("gen"+str(i))
+			S.plot_degree_distrib(S.genome[-1], "gen"+str(i))
 		S.new_generation()
 	S.plot_best_graph("end")
 	S.import_and_plot_score("end")
