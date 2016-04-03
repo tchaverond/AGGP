@@ -7,7 +7,6 @@ from networkx import *
 import heapq
 import collections
 import math
-import profile
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -321,7 +320,7 @@ class Simulation:
 		# Create an array that will contain the new genome
 		new_graph_list = [None]*(len(self.genome)-1)
 
-		# Compute Fecondity
+		# Compute fecondity
 		F = [None]*len(self.genome)
 		best_indiv = None
 		best_score = 0
@@ -382,7 +381,8 @@ class Simulation:
 	def monitor2(self, graph, output_name):
 		print "Edges : %d, nodes : %d."%(graph.number_of_edges(), graph.number_of_nodes())
 		print "Connected : %s"%is_connected(graph)
-		plt.figure(1)
+		fig = plt.gcf()
+		fig.set_size_inches(30,30)
 		draw_spring(graph)
 		plt.savefig(self.prefix+"best_graph_"+output_name+".pdf", bbox_inches='tight')
 		if (self.windows_plot):
@@ -444,6 +444,8 @@ class Simulation:
 		plt.legend()
 		fig = plt.gcf()
 		fig.set_size_inches(18, 18)
+		axes = plt.gca()
+		axes.set_xlim([0,len(scores_1_mean)])
 		plt.savefig(self.prefix+"scores_evolution_"+output_name+".pdf", bbox_inches='tight')
 		if (self.windows_plot):
 			plt.show()
@@ -456,6 +458,8 @@ class Simulation:
 		plt.legend()
 		fig = plt.gcf()
 		fig.set_size_inches(18, 18)
+		axes = plt.gca()
+		axes.set_xlim([0,len(scores_1_mean)])
 		plt.savefig(self.prefix+"global_score_evolution_"+output_name+".pdf", bbox_inches='tight')
 		if (self.windows_plot):
 			plt.show()
@@ -475,21 +479,18 @@ class Simulation:
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
 
 def run(S, n) :
-	S.plot_best_graph("beginning")
 	for i in xrange(n):
-		if (i %10) == 0 :
-			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)
-			#S.monitor_score()
+		if (i %20) == 0 : # Terminal output stating at which generation we are
+			print i, len(S.genome), sum([g.number_of_edges() for g in S.genome])/len(S.genome)	
+		if (i %50) == 0 : # Graphic output to vizualize "in real-time" progress of a run
+			S.plot_best_graph("gen"+str(i))
+			S.import_and_plot_score("gen"+str(i))
 		S.new_generation()
 	S.plot_best_graph("end")
 	S.import_and_plot_score("end")
 
-S1 = Simulation([45, 38, 0.5, 3, 0.5, 0.06, 0.22, 0.22, 0.22, 0.22, 1, 6, "test_toto_", False])
-S2 = Simulation([90, 140, 0.5, 3, 0.5, 0.05, 0.12, 0.11, 0.11, 0.12, 1, 6, "test_tata_", False])
-
-run(S1, 139)
-run(S2, 199)
-#profile.run("run(S)")
+S = Simulation([42, 42, 0.7, 4, 0.5, 0.05, 0.12, 0.11, 0.11, 0.12, 1, 6, "test_", False])
+run(S,249)
 
 
 
