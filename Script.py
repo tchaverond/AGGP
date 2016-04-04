@@ -182,9 +182,10 @@ class Simulation:
 		fig = plt.gcf()
 		fig.set_size_inches(18, 18)
 		plt.savefig(self.prefix+"degree_distribution_"+output_name+".pdf", bbox_inches='tight')
-
-
-
+		if (self.windows_plot):
+			plt.show()
+		else :
+			plt.clf()
 
 	"""
 	Evaluates the clustering coefficient (depending of the degree k) of the networkx object G passed as parameter,
@@ -537,8 +538,8 @@ def run(S, n) :
 	S.plot_best_graph("end")
 	S.import_and_plot_score("end")
 
-S1 = Simulation([300, 350, 0.7, 4, 0.5, 0.05, 0.12, 0.11, 0.11, 0.12, 1, 6, "big_run_", False])
+S1 = Simulation([10, 10, 0.7, 4, 0.5, 0.05, 0.12, 0.11, 0.11, 0.12, 1, 6, "big_run_", False])
 
-run(S1, 300)
+run(S1, 100)
 
 # -__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__-__- #
