@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import random
-import copy
+import random, copy, heapq, collections, math
 import matplotlib.pyplot as plt
 from networkx import *
-import heapq
-import collections
-import math
 import numpy as np
-import matplotlib.pyplot as plt
-
 
 class Simulation:
 	"""
