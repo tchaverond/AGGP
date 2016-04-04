@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
 
+#arg: <input filename> <prefix output filename> <windowed mode: 0 or 1> <score 1 weight> <score 2 weight> <score 3 weight>
 scores_filename = sys.argv[1]
 prefix = sys.argv[2] 
 windows_plot = int(sys.argv[3]) 
